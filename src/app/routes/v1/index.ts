@@ -1,6 +1,8 @@
 import express, { Router } from "express";
-// import config from "../../../config/config";
 import { AuthRoutes } from "../../modules/auth/auth.routes";
+import { ClassesRoutes } from "../../modules/classroom/classroom.routes";
+import { AssignmentRoutes } from "../../modules/assignment/assignment.routes";
+import { SubmissionRoutes } from "../../modules/submission/submission.routes";
 // import authRoute from "./auth.route";
 // import docsRoute from "./swagger.route";
 // import userRoute from "./user.route";
@@ -17,10 +19,18 @@ const defaultIRoute: IRoute[] = [
     path: "/auth",
     route: AuthRoutes,
   },
-  // {
-  //   path: "/users",
-  //   route: userRoute,
-  // },
+  {
+    path: "/classes",
+    route: ClassesRoutes,
+  },
+  {
+    path: "/assignments",
+    route: AssignmentRoutes,
+  },
+  {
+    path: "/submissions",
+    route: SubmissionRoutes,
+  },
 ];
 
 // const devIRoute: IRoute[] = [

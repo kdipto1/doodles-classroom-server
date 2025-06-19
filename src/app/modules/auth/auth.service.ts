@@ -30,7 +30,7 @@ const login = async (payload: Partial<IUser>): Promise<IUserLoginResponse> => {
   if (!passwordMatch)
     throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid password");
 
-  const { role, _id: userId } = isUserExists;
+  const { role, _id: userId, name } = isUserExists;
   const accessToken = JwtHelpers.createToken(
     { userId, role },
     config.jwt.secret as Secret,
@@ -46,6 +46,8 @@ const login = async (payload: Partial<IUser>): Promise<IUserLoginResponse> => {
   return {
     accessToken,
     refreshToken,
+    role,
+    name,
   };
 };
 

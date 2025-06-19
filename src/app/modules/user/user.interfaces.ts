@@ -28,4 +28,6 @@ export type UserModel = {
 export type IUserLoginResponse = {
   accessToken: string;
   refreshToken: string;
+  role: string;
+  name: string;
 };

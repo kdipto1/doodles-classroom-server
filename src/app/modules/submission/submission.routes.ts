@@ -16,7 +16,7 @@ router.get(
   SubmissionController.getSubmissionsByAssignment,
 );
 router.get(
-  "/mine/:assignmentId",
+  "/my/:assignmentId",
   auth(ENUM_USER_ROLE.STUDENT),
   SubmissionController.getMySubmission,
 );

@@ -31,6 +31,8 @@ const createClass = catchAsync(async (req: Request, res: Response) => {
 const joinClass = catchAsync(async (req: Request, res: Response) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const user = (req as any).user;
+  console.log(user);
+  console.log(req.body);
   if (user.role !== "student") {
     res
       .status(httpStatus.FORBIDDEN)
@@ -64,6 +66,7 @@ const joinClass = catchAsync(async (req: Request, res: Response) => {
 const getMyClasses = catchAsync(async (req: Request, res: Response) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const user = (req as any).user;
+  console.log(user);
   const query =
     user.role === "teacher"
       ? { teacher: user.userId }

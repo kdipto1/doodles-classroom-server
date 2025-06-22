@@ -16,19 +16,23 @@ const getDashboardStats = catchAsync(async (req: Request, res: Response) => {
   };
 
   if (user.role === "teacher") {
-    stats.classes = await Classroom.countDocuments({ teacher: user._id });
-    stats.assignments = await Assignment.countDocuments({ teacher: user._id });
+    stats.classes = await Classroom.countDocuments({ teacher: user.userId });
+    stats.assignments = await Assignment.countDocuments({
+      teacher: user.userId,
+    });
 
     stats.upcoming = await Assignment.countDocuments({
-      teacher: user._id,
+      teacher: user.userId,
       dueDate: { $gte: new Date() },
     });
   } else if (user.role === "student") {
     // Classes joined
-    stats.classes = await Classroom.countDocuments({ students: user._id });
+    stats.classes = await Classroom.countDocuments({ students: user.userId });
 
     // Fetch class IDs the student is in
-    const classes = await Classroom.find({ students: user._id }).select("_id");
+    const classes = await Classroom.find({ students: user.userId }).select(
+      "_id",
+    );
     const classIds = classes.map((cls) => cls._id);
 
     // Total assignments
@@ -38,7 +42,7 @@ const getDashboardStats = catchAsync(async (req: Request, res: Response) => {
 
     // Assignments the student has already submitted
     const submittedAssignmentIds = await Submission.find({
-      student: user._id,
+      student: user.userId,
     }).distinct("assignmentId");
 
     // Upcoming assignments not submitted

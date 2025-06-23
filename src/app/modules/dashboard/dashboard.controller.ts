@@ -18,11 +18,11 @@ const getDashboardStats = catchAsync(async (req: Request, res: Response) => {
   if (user.role === "teacher") {
     stats.classes = await Classroom.countDocuments({ teacher: user.userId });
     stats.assignments = await Assignment.countDocuments({
-      teacher: user.userId,
+      createdBy: user.userId,
     });
 
     stats.upcoming = await Assignment.countDocuments({
-      teacher: user.userId,
+      createdBy: user.userId,
       dueDate: { $gte: new Date() },
     });
   } else if (user.role === "student") {

@@ -10,7 +10,11 @@ router.post(
   auth(ENUM_USER_ROLE.TEACHER),
   AssignmentController.createAssignment,
 );
-router.get("/class/:classId", AssignmentController.getAssignmentsByClass);
+router.get(
+  "/class/:classId",
+  auth(ENUM_USER_ROLE.STUDENT, ENUM_USER_ROLE.TEACHER),
+  AssignmentController.getAssignmentsByClass,
+);
 router.get("/:id", AssignmentController.getAssignmentById);
 
 export const AssignmentRoutes = router;

@@ -3,6 +3,7 @@ import httpStatus from "http-status";
 import catchAsync from "../../../utils/catchAsync";
 import { Assignment } from "./assignment.model";
 import { Classroom } from "../classroom/classroom.model";
+import { Submission } from "../submission/submission.model";
 
 // Create assignment (Teacher only)
 const createAssignment = catchAsync(async (req: Request, res: Response) => {
@@ -38,15 +39,39 @@ const createAssignment = catchAsync(async (req: Request, res: Response) => {
 });
 
 // Get assignments by class ID
-const getAssignmentsByClass = catchAsync(
-  async (req: Request, res: Response) => {
-    const { classId } = req.params;
+// const getAssignmentsByClass = catchAsync(
+//   async (req: Request, res: Response) => {
+//     const { classId } = req.params;
 
-    const assignments = await Assignment.find({ classId });
+//     const assignments = await Assignment.find({ classId });
 
-    res.status(httpStatus.OK).json(assignments);
-  },
-);
+//     res.status(httpStatus.OK).json(assignments);
+//   },
+// );
+const getAssignmentsByClass = catchAsync(async (req, res) => {
+  const { classId } = req.params;
+  const userId = (req as any).userId; // ✅ from auth middleware
+
+  // Step 1: Get all assignments for the class
+  const assignments = await Assignment.find({ classId });
+
+  // Step 2: Enhance each with student's submission (only for students)
+  const enriched = await Promise.all(
+    assignments.map(async (assignment) => {
+      const submission = await Submission.findOne({
+        assignmentId: assignment._id,
+        student: userId,
+      }).select("submittedAt marks");
+
+      return {
+        ...assignment.toObject(),
+        mySubmission: submission || null,
+      };
+    }),
+  );
+
+  res.status(httpStatus.OK).json(enriched);
+});
 
 // Get assignment by ID
 const getAssignmentById = catchAsync(async (req: Request, res: Response) => {

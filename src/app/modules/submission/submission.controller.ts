@@ -72,7 +72,7 @@ const getMySubmission = catchAsync(async (req: Request, res: Response) => {
 // Grade a submission (Teacher only)
 const gradeSubmission = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
-    const { grade, feedback } = req.body;
+    const { marks, feedback } = req.body;
     const { id } = req.params;
 
     const submission = await Submission.findById(id);
@@ -84,7 +84,7 @@ const gradeSubmission = catchAsync(
       return;
     }
 
-    submission.grade = grade;
+    submission.marks = parseInt(marks);
     submission.feedback = feedback;
     await submission.save();
 

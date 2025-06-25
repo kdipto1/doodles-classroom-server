@@ -20,7 +20,7 @@ router.get(
   auth(ENUM_USER_ROLE.STUDENT),
   SubmissionController.getMySubmission,
 );
-router.put(
+router.patch(
   "/:id/grade",
   auth(ENUM_USER_ROLE.TEACHER),
   SubmissionController.gradeSubmission,

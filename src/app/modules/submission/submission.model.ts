@@ -15,10 +15,10 @@ const submissionSchema = new mongoose.Schema(
     submissionText: { type: String },
     submissionFile: { type: String },
     submittedAt: { type: Date, default: Date.now },
-    grade: { type: Number },
+    marks: { type: Number },
     feedback: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Submission = mongoose.model("Submission", submissionSchema);

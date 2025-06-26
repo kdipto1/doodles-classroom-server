@@ -46,12 +46,10 @@ const register = catchAsync(
     const user = await AuthService.register({ name, email, password, role });
 
     res.status(201).json({
-      user: {
-        userId: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      success: "true",
+      statusCode: httpStatus.OK,
+      message: "User registered successfully",
+      data: user,
     });
   },
 );

@@ -48,20 +48,24 @@ const createAssignment = catchAsync(async (req: Request, res: Response) => {
 //     res.status(httpStatus.OK).json(assignments);
 //   },
 // );
+
+// get assignment list for students for their class.
 const getAssignmentsByClass = catchAsync(async (req, res) => {
   const { classId } = req.params;
-  const userId = (req as any).userId; // ✅ from auth middleware
+  const { userId, role: userRole } = (req as any).user;
 
-  // Step 1: Get all assignments for the class
   const assignments = await Assignment.find({ classId });
 
-  // Step 2: Enhance each with student's submission (only for students)
   const enriched = await Promise.all(
     assignments.map(async (assignment) => {
-      const submission = await Submission.findOne({
-        assignmentId: assignment._id,
-        student: userId,
-      }).select("submittedAt marks");
+      let submission = null;
+
+      if (userRole === "student") {
+        submission = await Submission.findOne({
+          assignmentId: assignment._id,
+          studentId: userId,
+        }).select("submittedAt marks");
+      }
 
       return {
         ...assignment.toObject(),

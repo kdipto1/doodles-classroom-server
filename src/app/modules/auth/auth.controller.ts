@@ -5,37 +5,9 @@ import { AuthService } from "./auth.service";
 import config from "../../../config/config";
 import httpStatus from "http-status";
 
-// const register = catchAsync(async (req: Request, res: Response) => {
-//   const { name, email, password, role } = req.body;
-
-//   if (!name || !email || !password || !role) {
-//     return res.status(400).json({ message: "All fields are required." });
-//   }
-
-//   const userExists = await User.findOne({ email });
-//   if (userExists) {
-//     return res.status(400).json({ message: "User already exists." });
-//   }
-
-//   const user = await AuthService.register({ name, email, password, role });
-
-//   res.status(201).json({
-//     user: {
-//       userId: user._id,
-//       name: user.name,
-//       email: user.email,
-//       role: user.role,
-//     },
-//   });
-// });
 const register = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const { name, email, password, role } = req.body;
-
-    if (!name || !email || !password || !role) {
-      res.status(400).json({ message: "All fields are required." });
-      return;
-    }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -88,4 +60,14 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
   res.json(user);
 });
 
-export const AuthController = { login, register, getMe };
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.cookies;
+  const result = await AuthService.refreshToken(refreshToken);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Token refreshed successfully",
+    data: result,
+  });
+});
+
+export const AuthController = { login, register, getMe, refreshToken };

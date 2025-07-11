@@ -1,13 +1,14 @@
+import { UserPayload } from "../../../interfaces/user.payload";
 import { Request, Response } from "express";
 import httpStatus from "http-status";
 import catchAsync from "../../../utils/catchAsync";
 import { Assignment } from "../assignment/assignment.model";
 import { Submission } from "../submission/submission.model";
 import { Classroom } from "../classroom/classroom.model";
+import { ENUM_USER_ROLE } from "../../../enums/user";
 
 const getDashboardStats = catchAsync(async (req: Request, res: Response) => {
-  // @ts-ignore
-  const user = (req as any).user;
+  const user = (req as Request & { user: UserPayload }).user;
 
   const stats = {
     classes: 0,
@@ -15,7 +16,7 @@ const getDashboardStats = catchAsync(async (req: Request, res: Response) => {
     upcoming: 0,
   };
 
-  if (user.role === "teacher") {
+  if (user.role === ENUM_USER_ROLE.TEACHER) {
     stats.classes = await Classroom.countDocuments({ teacher: user.userId });
     stats.assignments = await Assignment.countDocuments({
       createdBy: user.userId,
@@ -25,7 +26,7 @@ const getDashboardStats = catchAsync(async (req: Request, res: Response) => {
       createdBy: user.userId,
       dueDate: { $gte: new Date() },
     });
-  } else if (user.role === "student") {
+  } else if (user.role === ENUM_USER_ROLE.STUDENT) {
     // Classes joined
     stats.classes = await Classroom.countDocuments({ students: user.userId });
 

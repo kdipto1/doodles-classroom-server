@@ -16,7 +16,7 @@ const assignmentSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Assignment = mongoose.model("Assignment", assignmentSchema);

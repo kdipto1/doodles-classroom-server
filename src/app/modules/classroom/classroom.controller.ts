@@ -27,8 +27,10 @@ const getMyClasses = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getClassById = catchAsync(async (req: Request, res: Response) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const user = (req as any).user;
   const { id } = req.params;
-  const classroom = await ClassroomService.getClassById(id);
+  const classroom = await ClassroomService.getClassById(id, user);
   res.status(httpStatus.OK).json(classroom);
 });
 

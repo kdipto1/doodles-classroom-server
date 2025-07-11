@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import httpStatus from "http-status";
@@ -7,7 +6,7 @@ import { logger } from "../logger";
 import ApiError from "./ApiError";
 
 export const errorConverter = (
-  err: any,
+  err: Error,
   _req: Request,
   _res: Response,
   next: NextFunction,
@@ -15,7 +14,7 @@ export const errorConverter = (
   let error = err;
   if (!(error instanceof ApiError)) {
     const statusCode =
-      error.statusCode || error instanceof mongoose.Error
+      (error as ApiError).statusCode || error instanceof mongoose.Error
         ? httpStatus.BAD_REQUEST
         : httpStatus.INTERNAL_SERVER_ERROR;
     const message: string = error.message || `${httpStatus[statusCode]}`;
@@ -24,13 +23,7 @@ export const errorConverter = (
   next(error);
 };
 
-// eslint-disable-next-line no-unused-vars
-export const errorHandler = (
-  err: ApiError,
-  _req: Request,
-  res: Response,
-  _next: NextFunction,
-) => {
+export const errorHandler = (err: ApiError, _req: Request, res: Response) => {
   let { statusCode, message } = err;
   if (config.nodeEnv === "production" && !err.isOperational) {
     statusCode = httpStatus.INTERNAL_SERVER_ERROR;

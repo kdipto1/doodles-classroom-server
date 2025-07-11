@@ -58,7 +58,7 @@ const refreshToken = async (token: string) => {
       token,
       config.jwt.refresh_secret as Secret,
     );
-  } catch (err) {
+  } catch {
     throw new ApiError(httpStatus.FORBIDDEN, "Invalid Refresh Token");
   }
 
@@ -66,7 +66,7 @@ const refreshToken = async (token: string) => {
     throw new ApiError(httpStatus.FORBIDDEN, "Invalid Refresh Token");
   }
 
-  const { userId, role } = verifiedToken;
+  const { userId } = verifiedToken;
 
   const isUserExists = await User.isUserExists(userId);
   if (!isUserExists) {

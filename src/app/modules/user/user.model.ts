@@ -1,6 +1,7 @@
 import mongoose, { model } from "mongoose";
 import bcrypt from "bcryptjs";
 import IUser, { UserModel } from "./user.interfaces";
+import { ENUM_USER_ROLE } from "../../../enums/user";
 
 const userSchema = new mongoose.Schema<IUser, UserModel>(
   {
@@ -20,7 +21,7 @@ const userSchema = new mongoose.Schema<IUser, UserModel>(
     },
     role: {
       type: String,
-      enum: ["student", "teacher"],
+      enum: [ENUM_USER_ROLE.STUDENT, ENUM_USER_ROLE.TEACHER],
       required: true,
     },
   },

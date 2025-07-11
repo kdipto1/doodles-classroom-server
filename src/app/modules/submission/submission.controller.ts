@@ -1,17 +1,18 @@
+import { UserPayload } from "../../../interfaces/user.payload";
 import { Request, Response } from "express";
 import httpStatus from "http-status";
 import catchAsync from "../../../utils/catchAsync";
 import { Submission } from "./submission.model";
+import { ENUM_USER_ROLE } from "../../../enums/user";
 
 // Submit assignment (Student only)
 const submitAssignment = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const { assignmentId, submissionText } = req.body;
 
-    // @ts-ignore
-    const user = (req as any).user;
+    const user = (req as Request & { user: UserPayload }).user;
 
-    if (user.role !== "student") {
+    if (user.role !== ENUM_USER_ROLE.STUDENT) {
       res.status(httpStatus.FORBIDDEN).json({
         message: "Only students can submit assignments",
       });
@@ -58,8 +59,7 @@ const getSubmissionsByAssignment = catchAsync(
 const getMySubmission = catchAsync(async (req: Request, res: Response) => {
   const { assignmentId } = req.params;
 
-  // @ts-ignore
-  const user = (req as any).user;
+  const user = (req as Request & { user: UserPayload }).user;
 
   const submission = await Submission.findOne({
     assignmentId,

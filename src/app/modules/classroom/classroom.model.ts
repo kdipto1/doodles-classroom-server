@@ -18,7 +18,7 @@ const classroomSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Classroom = mongoose.model("Classroom", classroomSchema);

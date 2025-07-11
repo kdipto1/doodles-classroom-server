@@ -3,3 +3,4 @@ dist/
 .env
 generateFiles.js
 repomix-server-output.txt
+repomix-server-code-output.xml

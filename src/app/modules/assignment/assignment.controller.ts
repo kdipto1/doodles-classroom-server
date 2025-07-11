@@ -4,15 +4,16 @@ import catchAsync from "../../../utils/catchAsync";
 import { Assignment } from "./assignment.model";
 import { Classroom } from "../classroom/classroom.model";
 import { Submission } from "../submission/submission.model";
+import { ENUM_USER_ROLE } from "../../../enums/user";
 
 // Create assignment (Teacher only)
 const createAssignment = catchAsync(async (req: Request, res: Response) => {
   const { title, description, dueDate, classId } = req.body;
 
-  // @ts-ignore
-  const user = (req as any).user;
+  const user = (req as Request & { user: { userId: string; role: string } })
+    .user;
 
-  if (user.role !== "teacher") {
+  if (user.role !== ENUM_USER_ROLE.TEACHER) {
     res.status(httpStatus.FORBIDDEN).json({
       message: "Only teachers can create assignments",
     });
@@ -52,7 +53,9 @@ const createAssignment = catchAsync(async (req: Request, res: Response) => {
 // get assignment list for students for their class.
 const getAssignmentsByClass = catchAsync(async (req, res) => {
   const { classId } = req.params;
-  const { userId, role: userRole } = (req as any).user;
+  const { userId, role: userRole } = (
+    req as Request & { user: { userId: string; role: string } }
+  ).user;
 
   const assignments = await Assignment.find({ classId });
 
@@ -60,7 +63,7 @@ const getAssignmentsByClass = catchAsync(async (req, res) => {
     assignments.map(async (assignment) => {
       let submission = null;
 
-      if (userRole === "student") {
+      if (userRole === ENUM_USER_ROLE.STUDENT) {
         submission = await Submission.findOne({
           assignmentId: assignment._id,
           studentId: userId,

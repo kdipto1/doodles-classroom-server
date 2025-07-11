@@ -20,6 +20,11 @@ router.get(
   auth(ENUM_USER_ROLE.TEACHER, ENUM_USER_ROLE.STUDENT),
   ClassroomController.getMyClasses,
 );
-router.get("/:id", ClassroomController.getClassById);
+// router.get("/:id", ClassroomController.getClassById);
+router.get(
+  "/:id",
+  auth(ENUM_USER_ROLE.TEACHER, ENUM_USER_ROLE.STUDENT),
+  ClassroomController.getClassById,
+);
 
 export const ClassesRoutes = router;

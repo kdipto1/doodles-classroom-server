@@ -4,32 +4,31 @@ import { Classroom } from "./classroom.model";
 import { User } from "../user/user.model";
 import mongoose from "mongoose";
 import config from "../../../config/config";
+import { ENUM_USER_ROLE } from "../../../enums/user";
 
 describe("Classroom Routes", () => {
   let teacherToken: string;
   let studentToken: string;
-  let teacherId: string;
-  let studentId: string;
   let classId: string;
 
   beforeAll(async () => {
-    await mongoose.connect(config.mongoose.url, { serverSelectionTimeoutMS: 20000 });
+    await mongoose.connect(config.mongoose.url, {
+      serverSelectionTimeoutMS: 20000,
+    });
     // Create a teacher and a student for testing
-    const teacher = await User.create({
+    await User.create({
       name: "Test Teacher",
       email: "teacher@test.com",
       password: "password123",
-      role: "teacher",
+      role: ENUM_USER_ROLE.TEACHER,
     });
-    teacherId = teacher._id as string;
 
-    const student = await User.create({
+    await User.create({
       name: "Test Student",
       email: "student@test.com",
       password: "password123",
-      role: "student",
+      role: ENUM_USER_ROLE.STUDENT,
     });
-    studentId = student._id as string;
 
     // Log in as the teacher to get a token
     const teacherLoginRes = await request(app).post("/api/v1/auth/login").send({

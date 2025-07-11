@@ -1,6 +1,4 @@
-import { Document, Model } from "mongoose";
-
-import { Document, Model, Types } from "mongoose";
+import { Model, Types } from "mongoose";
 
 export interface IClassroom {
   title: string;

@@ -1,2 +1,14 @@
+import { z } from "zod";
 
-// Define your validations here
+const createAssignment = z.object({
+  body: z.object({
+    title: z.string().min(1, "Title is required"),
+    description: z.string().optional(),
+    dueDate: z.string().optional(),
+    classId: z.string().min(1, "Class ID is required"),
+  }),
+});
+
+export const AssignmentValidation = {
+  createAssignment,
+};

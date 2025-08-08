@@ -1,7 +1,7 @@
 import express, { Express } from "express";
 import helmet from "helmet";
-// import xss from "xss-clean";
-// import ExpressMongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
+import ExpressMongoSanitize from "express-mongo-sanitize";
 import compression from "compression";
 import cors from "cors";
 // import passport from "passport";
@@ -23,9 +23,24 @@ if (config.nodeEnv !== "test") {
 // set security HTTP headers
 app.use(helmet());
 
-// enable cors
-app.use(cors());
-app.options("*", cors());
+// enable cors with proper configuration
+const corsOptions = {
+  origin:
+    config.nodeEnv === "production"
+      ? ["https://yourdomain.com", "https://www.yourdomain.com"] // Replace with your actual production domains
+      : [
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "http://127.0.0.1:3000",
+        ],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // parse json request body
 app.use(express.json());
@@ -34,8 +49,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // sanitize request data
-// app.use(xss());
-// app.use(ExpressMongoSanitize());
+app.use(xss());
+app.use(ExpressMongoSanitize());
 
 // gzip compression
 app.use(compression());

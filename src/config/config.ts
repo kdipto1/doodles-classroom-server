@@ -1,6 +1,48 @@
 import dotenv from "dotenv";
+import { z } from "zod";
+import {
+  DEFAULT_VALUES,
+  VALIDATION_LIMITS,
+  REGEX_PATTERNS,
+  ERROR_MESSAGES,
+} from "../constants/common";
 
 dotenv.config();
+
+// Environment validation schema
+const envSchema = z.object({
+  PORT: z.string().optional().default(DEFAULT_VALUES.PORT.toString()),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default(DEFAULT_VALUES.NODE_ENV),
+  MONGODB_URL: z.string().url().min(1, ERROR_MESSAGES.MONGODB_URL_REQUIRED),
+  JWT_SECRET: z
+    .string()
+    .min(
+      VALIDATION_LIMITS.JWT_SECRET_MIN_LENGTH,
+      ERROR_MESSAGES.JWT_SECRET_REQUIRED,
+    ),
+  JWT_SECRET_EXPIRES: z.string().min(1, ERROR_MESSAGES.JWT_EXPIRES_REQUIRED),
+  JWT_REFRESH_SECRET: z
+    .string()
+    .min(
+      VALIDATION_LIMITS.JWT_SECRET_MIN_LENGTH,
+      ERROR_MESSAGES.JWT_REFRESH_SECRET_REQUIRED,
+    ),
+  JWT_REFRESH_SECRET_EXPIRES: z
+    .string()
+    .min(1, ERROR_MESSAGES.JWT_REFRESH_EXPIRES_REQUIRED),
+  BCRYPT_SALT_ROUNDS: z
+    .string()
+    .regex(
+      REGEX_PATTERNS.BCRYPT_ROUNDS_PATTERN,
+      ERROR_MESSAGES.BCRYPT_ROUNDS_INVALID,
+    )
+    .default(DEFAULT_VALUES.BCRYPT_SALT_ROUNDS.toString()),
+});
+
+// Validate environment variables
+const env = envSchema.parse(process.env);
 
 interface Config {
   port: number;
@@ -14,22 +56,22 @@ interface Config {
     refresh_secret: string;
     refresh_secret_expiresIn: string;
   };
-  BCRYPT_SALT_ROUNDS: string;
+  BCRYPT_SALT_ROUNDS: number;
 }
 
 const config: Config = {
-  port: Number(process.env.PORT) || 5000,
-  nodeEnv: process.env.NODE_ENV || "development",
+  port: Number(env.PORT),
+  nodeEnv: env.NODE_ENV,
   mongoose: {
-    url: process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/doodles-class",
+    url: env.MONGODB_URL,
   },
   jwt: {
-    secret: process.env.JWT_SECRET as string,
-    expiresIn: process.env.JWT_SECRET_EXPIRES as string,
-    refresh_secret: process.env.JWT_REFRESH_SECRET as string,
-    refresh_secret_expiresIn: process.env.JWT_REFRESH_SECRET_EXPIRES as string,
+    secret: env.JWT_SECRET,
+    expiresIn: env.JWT_SECRET_EXPIRES,
+    refresh_secret: env.JWT_REFRESH_SECRET,
+    refresh_secret_expiresIn: env.JWT_REFRESH_SECRET_EXPIRES,
   },
-  BCRYPT_SALT_ROUNDS: process.env.BCRYPT_SALT_ROUNDS as string,
+  BCRYPT_SALT_ROUNDS: Number(env.BCRYPT_SALT_ROUNDS),
 };
 
 export default config;

@@ -4,16 +4,20 @@ import catchAsync from "../../../utils/catchAsync";
 import { Assignment } from "./assignment.model";
 import { Classroom } from "../classroom/classroom.model";
 import { Submission } from "../submission/submission.model";
+import { ENUM_USER_ROLE } from "../../../enums/user";
+import { SUCCESS_MESSAGES } from "../../../constants/common";
 
 // Create assignment (Teacher only)
 const createAssignment = catchAsync(async (req: Request, res: Response) => {
   const { title, description, dueDate, classId } = req.body;
 
-  // @ts-ignore
-  const user = (req as any).user;
+  const user = (req as Request & { user: { userId: string; role: string } })
+    .user;
 
-  if (user.role !== "teacher") {
+  if (user.role !== ENUM_USER_ROLE.TEACHER) {
     res.status(httpStatus.FORBIDDEN).json({
+      success: false,
+      statusCode: httpStatus.FORBIDDEN,
       message: "Only teachers can create assignments",
     });
     return;
@@ -22,6 +26,8 @@ const createAssignment = catchAsync(async (req: Request, res: Response) => {
   const classroom = await Classroom.findById(classId);
   if (!classroom || !classroom.teacher.equals(user.userId)) {
     res.status(httpStatus.FORBIDDEN).json({
+      success: false,
+      statusCode: httpStatus.FORBIDDEN,
       message: "Unauthorized to create assignment for this class",
     });
     return;
@@ -35,7 +41,12 @@ const createAssignment = catchAsync(async (req: Request, res: Response) => {
     createdBy: user.userId,
   });
 
-  res.status(httpStatus.CREATED).json(assignment);
+  res.status(httpStatus.CREATED).json({
+    success: true,
+    statusCode: httpStatus.CREATED,
+    message: SUCCESS_MESSAGES.ASSIGNMENT_CREATED,
+    data: assignment,
+  });
 });
 
 // Get assignments by class ID
@@ -52,7 +63,9 @@ const createAssignment = catchAsync(async (req: Request, res: Response) => {
 // get assignment list for students for their class.
 const getAssignmentsByClass = catchAsync(async (req, res) => {
   const { classId } = req.params;
-  const { userId, role: userRole } = (req as any).user;
+  const { userId, role: userRole } = (
+    req as Request & { user: { userId: string; role: string } }
+  ).user;
 
   const assignments = await Assignment.find({ classId });
 
@@ -60,7 +73,7 @@ const getAssignmentsByClass = catchAsync(async (req, res) => {
     assignments.map(async (assignment) => {
       let submission = null;
 
-      if (userRole === "student") {
+      if (userRole === ENUM_USER_ROLE.STUDENT) {
         submission = await Submission.findOne({
           assignmentId: assignment._id,
           studentId: userId,
@@ -74,7 +87,12 @@ const getAssignmentsByClass = catchAsync(async (req, res) => {
     }),
   );
 
-  res.status(httpStatus.OK).json(enriched);
+  res.status(httpStatus.OK).json({
+    success: true,
+    statusCode: httpStatus.OK,
+    message: SUCCESS_MESSAGES.ASSIGNMENTS_RETRIEVED,
+    data: enriched,
+  });
 });
 
 // Get assignment by ID
@@ -87,11 +105,20 @@ const getAssignmentById = catchAsync(async (req: Request, res: Response) => {
   );
 
   if (!assignment) {
-    res.status(httpStatus.NOT_FOUND).json({ message: "Assignment not found" });
+    res.status(httpStatus.NOT_FOUND).json({
+      success: false,
+      statusCode: httpStatus.NOT_FOUND,
+      message: "Assignment not found",
+    });
     return;
   }
 
-  res.status(httpStatus.OK).json(assignment);
+  res.status(httpStatus.OK).json({
+    success: true,
+    statusCode: httpStatus.OK,
+    message: SUCCESS_MESSAGES.ASSIGNMENT_RETRIEVED,
+    data: assignment,
+  });
 });
 
 export const AssignmentController = {

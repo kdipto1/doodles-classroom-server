@@ -4,6 +4,7 @@ import httpStatus from "http-status";
 import catchAsync from "../../../utils/catchAsync";
 import { Submission } from "./submission.model";
 import { ENUM_USER_ROLE } from "../../../enums/user";
+import { SUCCESS_MESSAGES } from "../../../constants/common";
 
 // Submit assignment (Student only)
 const submitAssignment = catchAsync(
@@ -14,6 +15,8 @@ const submitAssignment = catchAsync(
 
     if (user.role !== ENUM_USER_ROLE.STUDENT) {
       res.status(httpStatus.FORBIDDEN).json({
+        success: false,
+        statusCode: httpStatus.FORBIDDEN,
         message: "Only students can submit assignments",
       });
       return;
@@ -26,6 +29,8 @@ const submitAssignment = catchAsync(
 
     if (existing) {
       res.status(httpStatus.BAD_REQUEST).json({
+        success: false,
+        statusCode: httpStatus.BAD_REQUEST,
         message: "Already submitted",
       });
       return;
@@ -37,7 +42,12 @@ const submitAssignment = catchAsync(
       submissionText,
     });
 
-    res.status(httpStatus.CREATED).json(submission);
+    res.status(httpStatus.CREATED).json({
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: SUCCESS_MESSAGES.SUBMISSION_CREATED,
+      data: submission,
+    });
   },
 );
 
@@ -51,7 +61,12 @@ const getSubmissionsByAssignment = catchAsync(
       "name email",
     );
 
-    res.status(httpStatus.OK).json(submissions);
+    res.status(httpStatus.OK).json({
+      success: true,
+      statusCode: httpStatus.OK,
+      message: SUCCESS_MESSAGES.SUBMISSIONS_RETRIEVED,
+      data: submissions,
+    });
   },
 );
 
@@ -66,7 +81,12 @@ const getMySubmission = catchAsync(async (req: Request, res: Response) => {
     studentId: user.userId,
   });
 
-  res.status(httpStatus.OK).json(submission);
+  res.status(httpStatus.OK).json({
+    success: true,
+    statusCode: httpStatus.OK,
+    message: SUCCESS_MESSAGES.SUBMISSION_RETRIEVED,
+    data: submission,
+  });
 });
 
 // Grade a submission (Teacher only)
@@ -79,6 +99,8 @@ const gradeSubmission = catchAsync(
 
     if (!submission) {
       res.status(httpStatus.NOT_FOUND).json({
+        success: false,
+        statusCode: httpStatus.NOT_FOUND,
         message: "Submission not found",
       });
       return;
@@ -89,8 +111,10 @@ const gradeSubmission = catchAsync(
     await submission.save();
 
     res.status(httpStatus.OK).json({
-      message: "Graded successfully",
-      submission,
+      success: true,
+      statusCode: httpStatus.OK,
+      message: SUCCESS_MESSAGES.SUBMISSION_GRADED,
+      data: submission,
     });
   },
 );

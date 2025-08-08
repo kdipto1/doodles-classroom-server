@@ -1,19 +1,20 @@
-// import { JwtPayload } from "jsonwebtoken";
+import { UserPayload } from "./user.payload";
 
-// declare global {
-//   namespace Express {
-//     interface Request {
-//       user: string | JwtPayload;
-//     }
-//   }
-// }
-
-import { JwtPayload } from "jsonwebtoken";
-
+// Extend Express Request interface
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtPayload;
+      user?: UserPayload;
     }
   }
 }
+
+// Also declare for @types/express compatibility
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: UserPayload;
+  }
+}
+
+// Export the interface for use in other files
+export { UserPayload };

@@ -6,6 +6,7 @@ import { Assignment } from "../assignment/assignment.model";
 import { Submission } from "../submission/submission.model";
 import { Classroom } from "../classroom/classroom.model";
 import { ENUM_USER_ROLE } from "../../../enums/user";
+import { SUCCESS_MESSAGES } from "../../../constants/common"; // Add this import if you have dashboard messages
 
 const getDashboardStats = catchAsync(async (req: Request, res: Response) => {
   const user = (req as Request & { user: UserPayload }).user;
@@ -27,26 +28,21 @@ const getDashboardStats = catchAsync(async (req: Request, res: Response) => {
       dueDate: { $gte: new Date() },
     });
   } else if (user.role === ENUM_USER_ROLE.STUDENT) {
-    // Classes joined
     stats.classes = await Classroom.countDocuments({ students: user.userId });
 
-    // Fetch class IDs the student is in
     const classes = await Classroom.find({ students: user.userId }).select(
       "_id",
     );
     const classIds = classes.map((cls) => cls._id);
 
-    // Total assignments
     stats.assignments = await Assignment.countDocuments({
       classId: { $in: classIds },
     });
 
-    // Assignments the student has already submitted
     const submittedAssignmentIds = await Submission.find({
-      student: user.userId,
+      studentId: user.userId,
     }).distinct("assignmentId");
 
-    // Upcoming assignments not submitted
     stats.upcoming = await Assignment.countDocuments({
       classId: { $in: classIds },
       dueDate: { $gte: new Date() },
@@ -54,7 +50,12 @@ const getDashboardStats = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
-  res.status(httpStatus.OK).json(stats);
+  res.status(httpStatus.OK).json({
+    success: true,
+    statusCode: httpStatus.OK,
+    message: SUCCESS_MESSAGES.DASHBOARD_STATS_RETRIEVED,
+    data: stats,
+  });
 });
 
 export const DashboardController = {

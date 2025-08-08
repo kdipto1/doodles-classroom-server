@@ -67,6 +67,7 @@ const getMyClasses = async (user: UserPayload) => {
       : { students: user.userId };
 
   const classes = await Classroom.find(query)
+    .select("-students") // Exclude students field for performance
     .populate("teacher", "name email")
     .lean();
   return classes;

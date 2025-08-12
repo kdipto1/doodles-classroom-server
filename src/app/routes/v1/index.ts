@@ -4,8 +4,9 @@ import { ClassesRoutes } from "../../modules/classroom/classroom.routes";
 import { AssignmentRoutes } from "../../modules/assignment/assignment.routes";
 import { SubmissionRoutes } from "../../modules/submission/submission.routes";
 import { DashboardRoutes } from "../../modules/dashboard/dashboard.routes";
-import docsRoute from "../../../docs/swagger.routes";
-import config from "../../../config/config";
+// import authRoute from "./auth.route";
+// import docsRoute from "./swagger.route";
+// import userRoute from "./user.route";
 
 const router = express.Router();
 
@@ -37,23 +38,23 @@ const defaultIRoute: IRoute[] = [
   },
 ];
 
-const devIRoute: IRoute[] = [
-  // IRoute available only in development mode
-  {
-    path: "/docs",
-    route: docsRoute,
-  },
-];
+// const devIRoute: IRoute[] = [
+//   // IRoute available only in development mode
+//   {
+//     path: "/docs",
+//     route: docsRoute,
+//   },
+// ];
 
 defaultIRoute.forEach((route) => {
   router.use(route.path, route.route);
 });
 
 /* istanbul ignore next */
-if (config.nodeEnv === "development") {
-  devIRoute.forEach((route) => {
-    router.use(route.path, route.route);
-  });
-}
+// if (config.nodeEnv === "development") {
+//   devIRoute.forEach((route) => {
+//     router.use(route.path, route.route);
+//   });
+// }
 
 export default router;

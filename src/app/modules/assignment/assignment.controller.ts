@@ -5,7 +5,6 @@ import { Assignment } from "./assignment.model";
 import { Classroom } from "../classroom/classroom.model";
 import { Submission } from "../submission/submission.model";
 import { ENUM_USER_ROLE } from "../../../enums/user";
-import { SUCCESS_MESSAGES } from "../../../constants/common";
 
 // Create assignment (Teacher only)
 const createAssignment = catchAsync(async (req: Request, res: Response) => {
@@ -16,8 +15,6 @@ const createAssignment = catchAsync(async (req: Request, res: Response) => {
 
   if (user.role !== ENUM_USER_ROLE.TEACHER) {
     res.status(httpStatus.FORBIDDEN).json({
-      success: false,
-      statusCode: httpStatus.FORBIDDEN,
       message: "Only teachers can create assignments",
     });
     return;
@@ -26,8 +23,6 @@ const createAssignment = catchAsync(async (req: Request, res: Response) => {
   const classroom = await Classroom.findById(classId);
   if (!classroom || !classroom.teacher.equals(user.userId)) {
     res.status(httpStatus.FORBIDDEN).json({
-      success: false,
-      statusCode: httpStatus.FORBIDDEN,
       message: "Unauthorized to create assignment for this class",
     });
     return;
@@ -41,12 +36,7 @@ const createAssignment = catchAsync(async (req: Request, res: Response) => {
     createdBy: user.userId,
   });
 
-  res.status(httpStatus.CREATED).json({
-    success: true,
-    statusCode: httpStatus.CREATED,
-    message: SUCCESS_MESSAGES.ASSIGNMENT_CREATED,
-    data: assignment,
-  });
+  res.status(httpStatus.CREATED).json(assignment);
 });
 
 // Get assignments by class ID
@@ -87,12 +77,7 @@ const getAssignmentsByClass = catchAsync(async (req, res) => {
     }),
   );
 
-  res.status(httpStatus.OK).json({
-    success: true,
-    statusCode: httpStatus.OK,
-    message: SUCCESS_MESSAGES.ASSIGNMENTS_RETRIEVED,
-    data: enriched,
-  });
+  res.status(httpStatus.OK).json(enriched);
 });
 
 // Get assignment by ID
@@ -105,20 +90,11 @@ const getAssignmentById = catchAsync(async (req: Request, res: Response) => {
   );
 
   if (!assignment) {
-    res.status(httpStatus.NOT_FOUND).json({
-      success: false,
-      statusCode: httpStatus.NOT_FOUND,
-      message: "Assignment not found",
-    });
+    res.status(httpStatus.NOT_FOUND).json({ message: "Assignment not found" });
     return;
   }
 
-  res.status(httpStatus.OK).json({
-    success: true,
-    statusCode: httpStatus.OK,
-    message: SUCCESS_MESSAGES.ASSIGNMENT_RETRIEVED,
-    data: assignment,
-  });
+  res.status(httpStatus.OK).json(assignment);
 });
 
 export const AssignmentController = {

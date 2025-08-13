@@ -1,6 +1,10 @@
 node_modules/
 dist/
 .env
+.vercel
 generateFiles.js
 repomix-server-output.txt
 repomix-server-code-output.xml
+DEVELOPMENT-plan.md
+IMPROVEMENTS-COMPLETED.md
+repomix-client-code-output.xml

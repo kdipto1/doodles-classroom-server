@@ -5,12 +5,14 @@ import config from "./config/config";
 import { logger } from "./logger";
 
 let server: http.Server;
-mongoose.connect(config.mongoose.url).then(() => {
-  logger.info("Connected to MongoDB");
-  server = app.listen(config.port, () => {
-    logger.info(`Listening to port ${config.port}`);
+mongoose
+  .connect(config.mongoose.url, { dbName: "doodles-classroom" })
+  .then(() => {
+    logger.info("Connected to MongoDB");
+    server = app.listen(config.port, () => {
+      logger.info(`Listening to port ${config.port}`);
+    });
   });
-});
 
 const exitHandler = () => {
   if (server) {

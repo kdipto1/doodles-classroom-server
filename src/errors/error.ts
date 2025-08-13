@@ -33,8 +33,7 @@ export const errorHandler = (err: ApiError, _req: Request, res: Response) => {
   res.locals["errorMessage"] = err.message;
 
   const response = {
-    success: false,
-    statusCode: statusCode,
+    code: statusCode,
     message,
     ...(config.nodeEnv === "development" && { stack: err.stack }),
   };
@@ -43,5 +42,5 @@ export const errorHandler = (err: ApiError, _req: Request, res: Response) => {
     logger.error(err);
   }
 
-  res.status(statusCode).json(response);
+  res.status(statusCode).send(response);
 };

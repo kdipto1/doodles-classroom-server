@@ -2,15 +2,12 @@ import express from "express";
 import { AssignmentController } from "./assignment.controller";
 import auth from "../../middleware/auth";
 import { ENUM_USER_ROLE } from "../../../enums/user";
-import validateRequest from "../../middleware/validateRequest";
-import { AssignmentValidation } from "./assignment.validation";
 
 const router = express.Router();
 
 router.post(
   "/createAssignment",
   auth(ENUM_USER_ROLE.TEACHER),
-  validateRequest(AssignmentValidation.createAssignment),
   AssignmentController.createAssignment,
 );
 router.get(

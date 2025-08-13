@@ -4,9 +4,6 @@ import httpStatus from "http-status";
 import { JwtPayload, Secret } from "jsonwebtoken";
 import { JwtHelpers } from "../../utils/jwtHelpers";
 import config from "../../config/config";
-import { ERROR_MESSAGES } from "../../constants/common";
-// Import to ensure Request interface extension is loaded
-import "../../interfaces";
 
 const auth =
   (...requiredRoles: string[]) =>
@@ -14,10 +11,7 @@ const auth =
     try {
       const token = req.headers["authorization"]?.replace("Bearer ", "");
       if (!token) {
-        throw new ApiError(
-          httpStatus.UNAUTHORIZED,
-          ERROR_MESSAGES.UNAUTHORIZED,
-        );
+        throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized");
       }
 
       let verifiedUser: JwtPayload | string = "";
@@ -27,18 +21,14 @@ const auth =
       if (typeof verifiedUser === "string") {
         throw new ApiError(
           httpStatus.UNAUTHORIZED,
-          ERROR_MESSAGES.TOKEN_VERIFICATION_FAILED,
+          "Token verification failed",
         );
       }
-      (req as any).user = verifiedUser as {
-        userId: string;
-        role: string;
-        iat: number;
-        exp: number;
-      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (req as any).user = verifiedUser; // JwtPayload
 
       if (requiredRoles.length && !requiredRoles.includes(verifiedUser.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, ERROR_MESSAGES.FORBIDDEN);
+        throw new ApiError(httpStatus.FORBIDDEN, "Forbidden");
       }
       next();
     } catch (error) {

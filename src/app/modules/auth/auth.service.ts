@@ -1,10 +1,11 @@
 import { Secret } from "jsonwebtoken";
 import config from "../../../config/config";
-import { ApiError } from "../../../errors";
+
 import { JwtHelpers } from "../../../utils/jwtHelpers";
 import IUser, { IUserLoginResponse } from "../user/user.interfaces";
 import { User } from "../user/user.model";
 import httpStatus from "http-status";
+import ApiError from "../../../errors/ApiError";
 
 const register = async (payload: Partial<IUser>): Promise<IUser> => {
   const result = await User.create(payload);
@@ -21,7 +22,8 @@ const login = async (payload: Partial<IUser>): Promise<IUserLoginResponse> => {
 
   const isUserExists = await User.findOne({ email });
 
-  if (!isUserExists) throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  if (!isUserExists)
+    throw new ApiError(httpStatus.NOT_FOUND, "User User not found");
 
   const passwordMatch = await User.comparePassword(
     password,

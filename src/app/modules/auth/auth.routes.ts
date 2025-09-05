@@ -17,7 +17,7 @@ router.post(
   validateRequest(AuthValidation.login),
   AuthController.login,
 );
-router.post(
+router.get(
   "/me",
   auth(ENUM_USER_ROLE.TEACHER, ENUM_USER_ROLE.STUDENT),
   AuthController.getMe,

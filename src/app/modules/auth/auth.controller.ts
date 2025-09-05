@@ -17,11 +17,14 @@ const register = catchAsync(
 
     const user = await AuthService.register({ name, email, password, role });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...userWithoutPassword } = user.toObject();
+
     res.status(201).json({
       success: "true",
       statusCode: httpStatus.OK,
       message: "User registered successfully",
-      data: user,
+      data: userWithoutPassword,
     });
   },
 );

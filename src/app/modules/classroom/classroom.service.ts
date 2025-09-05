@@ -2,10 +2,11 @@ import { UserPayload } from "../../../interfaces/user.payload";
 import httpStatus from "http-status";
 import { nanoid } from "nanoid";
 import { Types } from "mongoose";
-import { ApiError } from "../../../errors";
+
 import { IClassroom } from "./classroom.interfaces";
 import { Classroom } from "./classroom.model";
 import { ENUM_USER_ROLE } from "../../../enums/user";
+import ApiError from "../../../errors/ApiError";
 
 const createClass = async (
   user: UserPayload,

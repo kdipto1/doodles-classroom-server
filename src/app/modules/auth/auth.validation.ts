@@ -7,7 +7,8 @@ const register = z.object({
     email: z.string().email({ message: "Invalid email address" }),
     password: z
       .string()
-      .min(6, { message: "Password must be at least 6 characters long" }),
+      .min(6, { message: "Password must be at least 6 characters long" })
+      .max(72, { message: "Password cannot be longer than 72 characters" }),
     role: z.enum([ENUM_USER_ROLE.STUDENT, ENUM_USER_ROLE.TEACHER]),
   }),
 });

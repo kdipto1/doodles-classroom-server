@@ -1,6 +1,7 @@
 import express, { Express } from "express";
 import helmet from "helmet";
-import xss from "xss-clean";
+import { JSDOM } from "jsdom";
+import createDOMPurify from "dompurify";
 import ExpressMongoSanitize from "express-mongo-sanitize";
 import compression from "compression";
 import cors from "cors";
@@ -11,8 +12,9 @@ import config from "./config/config";
 import { morgan } from "./logger";
 // import { jwtStrategy } from "./modules/auth";
 import authLimiter from "./utils/rateLimiter";
-import { ApiError, errorConverter, errorHandler } from "./errors";
 import routes from "./app/routes/v1";
+import globalErrorHandle from "./app/middleware/globalErrorHandler";
+import ApiError from "./errors/ApiError";
 
 const app: Express = express();
 
@@ -70,7 +72,31 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // sanitize request data
-app.use(xss());
+
+// sanitize request data
+const window = new JSDOM("").window;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const purify = createDOMPurify(window as any);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const sanitize = (obj: any) => {
+  for (const key in obj) {
+    if (typeof obj[key] === "string") {
+      obj[key] = purify.sanitize(obj[key]);
+    } else if (typeof obj[key] === "object" && obj[key] !== null) {
+      obj[key] = sanitize(obj[key]);
+    }
+  }
+  return obj;
+};
+
+app.use((req, res, next) => {
+  req.body = sanitize(req.body);
+  req.query = sanitize(req.query);
+  req.params = sanitize(req.params);
+  next();
+});
+
 app.use(ExpressMongoSanitize());
 
 // gzip compression
@@ -90,13 +116,14 @@ app.use("/api/v1", routes);
 
 // send back a 404 error for any unknown api request
 app.use((_req, _res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
+  next(new ApiError(httpStatus.NOT_FOUND, " Api Not found"));
 });
 
+app.use(globalErrorHandle);
 // convert error to ApiError, if needed
-app.use(errorConverter);
+// app.use(errorConverter);
 
 // handle error
-app.use(errorHandler);
+// app.use(errorHandler);
 
 export default app;

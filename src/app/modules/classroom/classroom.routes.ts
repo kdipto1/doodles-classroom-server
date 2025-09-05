@@ -2,12 +2,15 @@ import express from "express";
 import { ClassroomController } from "./classroom.controller";
 import auth from "../../middleware/auth";
 import { ENUM_USER_ROLE } from "../../../enums/user";
+import validateRequest from "../../middleware/validateRequest";
+import { ClassroomValidation } from "./classroom.validation";
 
 const router = express.Router();
 
 router.post(
   "/createClass",
   auth(ENUM_USER_ROLE.TEACHER),
+  validateRequest(ClassroomValidation.createClassroomZodSchema),
   ClassroomController.createClass,
 );
 router.post(

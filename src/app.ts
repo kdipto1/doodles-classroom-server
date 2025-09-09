@@ -1,16 +1,12 @@
 import express, { Express } from "express";
 import helmet from "helmet";
-import { JSDOM } from "jsdom";
-import createDOMPurify from "dompurify";
 import ExpressMongoSanitize from "express-mongo-sanitize";
 import compression from "compression";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-// import passport from "passport";
 import httpStatus from "http-status";
 import config from "./config/config";
 import { morgan } from "./logger";
-// import { jwtStrategy } from "./modules/auth";
 import authLimiter from "./utils/rateLimiter";
 import routes from "./app/routes/v1";
 import globalErrorHandle from "./app/middleware/globalErrorHandler";
@@ -72,31 +68,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // sanitize request data
-
-// sanitize request data
-const window = new JSDOM("").window;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const purify = createDOMPurify(window as any);
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sanitize = (obj: any) => {
-  for (const key in obj) {
-    if (typeof obj[key] === "string") {
-      obj[key] = purify.sanitize(obj[key]);
-    } else if (typeof obj[key] === "object" && obj[key] !== null) {
-      obj[key] = sanitize(obj[key]);
-    }
-  }
-  return obj;
-};
-
-app.use((req, res, next) => {
-  req.body = sanitize(req.body);
-  req.query = sanitize(req.query);
-  req.params = sanitize(req.params);
-  next();
-});
-
 app.use(ExpressMongoSanitize());
 
 // gzip compression

@@ -17,7 +17,7 @@ const register = catchAsync(
 
     const user = await AuthService.register({ name, email, password, role });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
     const { password: _, ...userWithoutPassword } = user.toObject();
 
     res.status(201).json({

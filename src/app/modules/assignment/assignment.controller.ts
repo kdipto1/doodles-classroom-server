@@ -1,104 +1,94 @@
 import { Request, Response } from "express";
 import httpStatus from "http-status";
 import catchAsync from "../../../utils/catchAsync";
-import { Assignment } from "./assignment.model";
-import { Classroom } from "../classroom/classroom.model";
-import { Submission } from "../submission/submission.model";
-import { ENUM_USER_ROLE } from "../../../enums/user";
+import { Types } from "mongoose";
+import { IAssignmentUpdate } from "./assignment.interfaces";
+import ApiError from "../../../errors/ApiError";
+import { AssignmentService } from "./assignment.service";
 
 // Create assignment (Teacher only)
 const createAssignment = catchAsync(async (req: Request, res: Response) => {
   const { title, description, dueDate, classId } = req.body;
 
-  const user = (req as Request & { user: { userId: string; role: string } })
-    .user;
-
-  if (user.role !== ENUM_USER_ROLE.TEACHER) {
-    res.status(httpStatus.FORBIDDEN).json({
-      message: "Only teachers can create assignments",
-    });
-    return;
+  if (!req.user) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "User not authenticated");
   }
 
-  const classroom = await Classroom.findById(classId);
-  if (!classroom || !classroom.teacher.equals(user.userId)) {
-    res.status(httpStatus.FORBIDDEN).json({
-      message: "Unauthorized to create assignment for this class",
-    });
-    return;
-  }
-
-  const assignment = await Assignment.create({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const assignment = await AssignmentService.createAssignment(req.user as any, {
     title,
     description,
     dueDate,
     classId,
-    createdBy: user.userId,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createdBy: new Types.ObjectId((req.user as any).userId),
   });
 
-  res.status(httpStatus.CREATED).json(assignment);
+  res.status(httpStatus.CREATED).json({
+    success: true,
+    message: "Assignment created successfully",
+    data: assignment,
+  });
 });
-
-// Get assignments by class ID
-// const getAssignmentsByClass = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const { classId } = req.params;
-
-//     const assignments = await Assignment.find({ classId });
-
-//     res.status(httpStatus.OK).json(assignments);
-//   },
-// );
 
 // get assignment list for students for their class.
-const getAssignmentsByClass = catchAsync(async (req, res) => {
-  const { classId } = req.params;
-  const { userId, role: userRole } = (
-    req as Request & { user: { userId: string; role: string } }
-  ).user;
+const getAssignmentsByClass = catchAsync(
+  async (req: Request, res: Response) => {
+    const { classId } = req.params;
 
-  const assignments = await Assignment.find({ classId });
+    if (!req.user) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "User not authenticated");
+    }
 
-  const enriched = await Promise.all(
-    assignments.map(async (assignment) => {
-      let submission = null;
+    const assignments = await AssignmentService.getAssignmentsByClass(
+      classId,
+      req.user,
+    );
 
-      if (userRole === ENUM_USER_ROLE.STUDENT) {
-        submission = await Submission.findOne({
-          assignmentId: assignment._id,
-          studentId: userId,
-        }).select("submittedAt marks");
-      }
-
-      return {
-        ...assignment.toObject(),
-        mySubmission: submission || null,
-      };
-    }),
-  );
-
-  res.status(httpStatus.OK).json(enriched);
-});
+    res.status(httpStatus.OK).json({
+      success: true,
+      data: assignments,
+    });
+  },
+);
 
 // Get assignment by ID
 const getAssignmentById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const assignment = await Assignment.findById(id).populate(
-    "createdBy",
-    "name",
-  );
+  const assignment = await AssignmentService.getAssignmentById(id);
 
-  if (!assignment) {
-    res.status(httpStatus.NOT_FOUND).json({ message: "Assignment not found" });
-    return;
+  res.status(httpStatus.OK).json({
+    success: true,
+    data: assignment,
+  });
+});
+
+// Edit assignment (Teacher only)
+const editAssignment = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const updateData: IAssignmentUpdate = req.body;
+
+  if (!req.user) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "User not authenticated");
   }
 
-  res.status(httpStatus.OK).json(assignment);
+  const updatedAssignment = await AssignmentService.updateAssignment(
+    id,
+    req.user,
+    updateData,
+  );
+
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "Assignment updated successfully",
+    data: updatedAssignment,
+  });
 });
 
 export const AssignmentController = {
   createAssignment,
   getAssignmentsByClass,
   getAssignmentById,
+  editAssignment,
 };

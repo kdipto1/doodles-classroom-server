@@ -4,6 +4,14 @@ import httpStatus from "http-status";
 import { JwtPayload, Secret } from "jsonwebtoken";
 import { JwtHelpers } from "../../utils/jwtHelpers";
 import config from "../../config/config";
+import { UserPayload } from "../../interfaces/user.payload";
+
+// Extend Express Request interface
+declare module "express" {
+  interface Request {
+    user?: UserPayload;
+  }
+}
 
 const auth =
   (...requiredRoles: string[]) =>
@@ -24,8 +32,12 @@ const auth =
           "Token verification failed",
         );
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (req as any).user = verifiedUser; // JwtPayload
+      const userPayload: UserPayload = {
+        userId: verifiedUser.userId as string,
+        role: verifiedUser.role as string,
+      };
+
+      req.user = userPayload;
 
       if (requiredRoles.length && !requiredRoles.includes(verifiedUser.role)) {
         throw new ApiError(httpStatus.FORBIDDEN, "Forbidden");

@@ -7,10 +7,11 @@ import config from "../../config/config";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const globalErrorHandle: ErrorRequestHandler = (err, req, res, next) => {
-  if (config.nodeEnv === "development")
+  if (config.nodeEnv === "development") {
     console.log("Global Error Handler:", err);
+  }
+
   let statusCode = 500;
-  // let success = false;
   let message = "Something went wrong";
   let errorMessages: { path: string | number; message: string }[] = [];
   if (err instanceof ApiError) {
@@ -51,7 +52,6 @@ const globalErrorHandle: ErrorRequestHandler = (err, req, res, next) => {
     errorMessages,
     stack: config.nodeEnv !== "production" ? err?.stack : undefined,
   });
-  // next();
 };
 
 export default globalErrorHandle;
